@@ -1,0 +1,170 @@
+CREATE TABLE Customer
+(
+    customerId	INTEGER(10),
+    fName	VARCHAR(10) NOT NULL,
+    lName	VARCHAR(10) NOT NULL,
+    eMail	VARCHAR(20) UNIQUE NOT NULL,
+    street	VARCHAR(30) NOT NULL,
+    city	VARCHAR(15) NOT NULL,
+    postal_code	VARCHAR(25) NOT NULL,
+    CONSTRAINT	c_cid_pk PRIMARY kEY (customerId)
+		
+    
+);
+
+
+CREATE TABLE OnlinePayment
+(
+    paymentId	INTEGER,
+    amount	INTEGER NOT NULL,
+    paymentDate	DATE NOT NULL,
+    transationId	INTEGER NOT NULL,
+    cardType	VARCHAR(15) NOT NULL,
+    cardNumber	VARCHAR(15) NOT NULL,
+    expiaryDate	DATE NOT NULL,
+    cvv	INTEGER NOT NULL,
+    customerId	INTEGER,
+    CONSTRAINT	op_pid_pk PRIMARY KEY (paymentId),
+    CONSTRAINT	op_cid_fk FOREIGN KEY (customerId) REFERENCES Customer(customerId)
+);
+
+
+CREATE TABLE BankTransferPayment
+(
+    paymentId	INTEGER NOT NULL,
+    amount	INTEGER NOT NULL,
+    paymentDate	DATE NOT NULL,
+    bankName	VARCHAR(15) NOT NULL,
+    accNo	INTEGER NOT NULL,
+    accHolderName	VARCHAR(15) NOT NULL,
+    customerId	INTEGER,
+    CONSTRAINT btp_pid_pk PRIMARY KEY (paymentId),
+    CONSTRAINT btp_cid_fk FOREIGN KEY (customerId) REFERENCES Customer(customerId)
+);
+
+
+
+CREATE TABLE Delivery
+(
+    deliveryId		INTEGER(10),
+    deliveryDate	DATE NOT NULL,
+    street		VARCHAR(15) NOT NULL,
+    city		VARCHAR(15) NOT NULL,
+    postal_code VARCHAR(15) NOT NULL,
+    deliveryStatus VARCHAR(15) CHECK (deliveryStatus IN ('dispatched', 'in transit', 'delivered')),
+    customerId	INTEGER,
+    CONSTRAINT d_did_pk PRIMARY KEY (deliveryId),
+    CONSTRAINT d_cid_fk FOREIGN KEY (customerId) REFERENCES Customer(customerId)
+);
+
+
+
+
+CREATE TABLE OnlineOrder 
+(
+    orderId	INTEGER(10),
+    orderDate	DATE NOT NULL,
+    orderStatus	VARCHAR(20) CHECK (orderStatus IN ('pending', 'processing', 'out for delivery', 'delivered')),
+    customerId	INTEGER,
+    deliveryId	INTEGER,
+    paymentId	INTEGER,
+    CONSTRAINT	o_oid_pk PRIMARY KEY (orderId),
+    CONSTRAINT	o_cid_fk FOREIGN KEY (customerId) REFERENCES Customer(customerId),
+    CONSTRAINT	o_did_fk FOREIGN KEY (deliveryId) REFERENCES Delivery(deliveryId),
+    CONSTRAINT	o_pid_fk_online FOREIGN KEY (paymentId) REFERENCES OnlinePayment(paymentId),
+    CONSTRAINT	o_pid_fk_bank FOREIGN KEY (paymentId) REFERENCES BankTransferPayment(paymentId)
+);
+
+
+CREATE TABLE BookItem
+(
+    itemCode	INTEGER(10),
+    price	INTEGER NOT NULL,
+    stockLevel	INTEGER NOT NULL,
+    reorderLevel	INTEGER NOT NULL,
+    ISBN	VARCHAR(13) NOT NULL,
+    title	VARCHAR(30) NOT NULL,
+    genre	VARCHAR(30) NOT NULL,
+    category	VARCHAR(20) NOT NULL,
+    author	VARCHAR(30) NOT NULL,
+    publisher	VARCHAR(30) NOT NULL,
+    yearOfPublication	DATE NOT NULL,
+    CONSTRAINT bi_ic_pk PRIMARY KEY (itemCode)
+);
+
+
+
+CREATE TABLE StationaryItem
+(
+    itemCode	INTEGER(10),
+    price	INTEGER NOT NULL,
+    stockLevel	INTEGER NOT NULL,
+    reorderLevel	INTEGER NOT NULL,
+    type	VARCHAR(30) NOT NULL,
+    brand	VARCHAR(30) NOT NULL,
+    color	VARCHAR(15) NOT NULL,
+    size	VARCHAR(15) NOT NULL,
+    CONSTRAINT si_ic_pk PRIMARY KEY (itemCode)
+);
+
+
+
+CREATE TABLE Order_item
+(
+    order_itemId	INTEGER(3),
+    quantity	INTEGER NOT NULL,
+    price	INTEGER NOT NULL,
+    orderId	INTEGER,
+    itemCode	INTEGER,
+    CONSTRAINT	oi_oiid_pk PRIMARY KEY (order_itemId),
+    CONSTRAINT	oi_oid_fk FOREIGN KEY (orderId) REFERENCES OnlineOrder(orderId),
+    CONSTRAINT	oi_iid_fk_bi FOREIGN KEY (itemCode) REFERENCES BookItem(itemCode),
+    CONSTRAINT	oi_iid_fk_si FOREIGN KEY (itemCode) REFERENCES StationaryItem(itemCode)
+);
+
+
+
+CREATE TABLE Supplier
+(
+    supplierId	INTEGER(4),
+    supplierType VARCHAR(25) CHECK (supplierType IN ('individual', 'company')),
+    name	VARCHAR(30) NOT NULL,
+    eMail	VARCHAR(30) NOT NULL,
+    number	VARCHAR(10) NOT NULL,
+    street	VARCHAR(30) NOT NULL,
+    city	VARCHAR(20)	NOT NULL,
+    province	VARCHAR(20) NOT NULL,
+    telNo	VARCHAR(10) NOT NULL,
+    CONSTRAINT	s_sid_pk PRIMARY KEY (supplierId)
+);
+ 
+
+
+
+CREATE TABLE BookItemSupplier
+(
+    itemCode	INTEGER(10),
+    supplierId	INTEGER(4),
+    suppliedDate	DATE NOT NULL,
+    CONSTRAINT	bis_pk PRIMARY KEY (itemCode, supplierId, suppliedDate),
+    CONSTRAINT	bis_ic_fk FOREIGN KEY (itemCode) REFERENCES BookItem(itemCode),
+    CONSTRAINT	bis_sid_fk FOREIGn KEY (supplierId) REFERENCES Supplier(supplierId)
+);
+
+
+CREATE TABLE StationaryItemSupplier
+(
+    itemCode	INTEGER(10),
+    supplierId	INTEGER(4),
+    suppliedDate	DATE NOT NULL,
+    CONSTRAINT	sis_pk PRIMARY KEY (itemCode, supplierId, suppliedDate),
+    CONSTRAINT	sis_ic_fk FOREIGN KEY (itemCode) REFERENCES StationaryItem(itemCode),
+    CONSTRAINT	sis_sid_fk FOREIGn KEY (supplierId) REFERENCES Supplier(supplierId)
+);
+
+create OnlineOrder table with these attributes orderId {PK}
+orderDate
+orderStatus
+customerId {FK}
+deliveryId {FK}
+paymentId {FK} using this pattern and logic 
